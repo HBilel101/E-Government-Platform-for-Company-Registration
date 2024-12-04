@@ -6,7 +6,6 @@ const companyRoutes = require('./routes/company');
 const app = express();
 
 dotenv.config();
-
 // Middleware pour lire le JSON des requêtes
 app.use(express.json());
 
