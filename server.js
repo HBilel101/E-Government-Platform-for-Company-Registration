@@ -5,11 +5,12 @@ const authRoutes = require('./routes/auth');
 const companyRoutes = require('./routes/company');
 const userRoutes = require('./routes/user')
 const app = express();
+const cors = require('cors');
 
 dotenv.config();
 // Middleware pour lire le JSON des requêtes
 app.use(express.json());
-
+app.use(cors());
 // Connexion à MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("MongoDB connected"))

@@ -5,6 +5,27 @@ const Request = require('../models/requests')
 const User = require("../models/userModel")
 const router = express.Router();
 
+// add : authMiddleware(['admin']),
+router.get('/',authMiddleware(['admin']),async (req,res)=>{
+let users = await User.find({role:'user'},{username:1,email:1,status:1,_id:1})
+console.log(users)
+if (users.length ==0 ){res.status(401).json('error')}
+res.status(201).json({users:users})
+})
+
+router.get('/profile',authMiddleware(['user']),async (req,res)=>{
+    userId = req.user.id;
+    try{
+        let user  = await User.find({_id:userId},{username:1,email:1});
+        res.status(201).json(user)
+
+    }catch (error){
+        res.status(401).json({error:"Not able to Find it"})
+    }
+    
+
+})
+
 router.use('/update/:id',authMiddleware(['admin']),async (req,res)=>{
     try {
         const userId = req.params.id;

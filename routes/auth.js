@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 
 // Générer un token JWT
 const generateToken = (user) => {
-    return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '2d' });
+    return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 // Inscription
@@ -32,11 +32,27 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         const token = generateToken(user);
-        res.json({ token });
+        res.json({ token,user });
     } catch (err) {
         res.status(400).json({ error: 'Login failed' });
     }
 });
+
+router.post('/admin/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email ,role:"admin"});
+        console.log(user)
+        if (!user || !(await user.comparePassword(password))) {
+            return res.status(401).json({ error: 'Invalid credentials' });}
+            
+        const token = generateToken(user); 
+        res.json({ token,user });
+    } catch (err) {
+        res.status(400).json({ error: 'Login failed' });
+    }
+});
+
 
 router.post('/logout',async (req,res)=>{
     res.send('Nothing done try to destroy the JWT')

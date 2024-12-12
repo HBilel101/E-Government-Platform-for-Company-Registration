@@ -3,7 +3,7 @@ const Company = require("../models/companyModel");
 const { authMiddleware } = require("./auth");
 const Request = require("../models/requests");
 const router = express.Router();
-
+const User = require('../models/userModel')
 // Créer une entreprise (Utilisateur authentifié)
 //peut etre admin ou simple utilisateur
 //1 middleware pour vérifier les tokens ensuite passer ala 2éme middleware
@@ -21,6 +21,24 @@ router.post("/", authMiddleware(["user", "admin"]), async (req, res) => {
     res.status(400).json({ error: "Company creation failed" });
   }
 });
+
+
+/*Admin Section  */
+//stats for the Dashboard
+router.get('/admin/stats',authMiddleware(["admin"]),async (req,res)=>{
+  try{
+    companies = await Company.find({},{ name: 1, status: 1, registrationNumber: 1, owner: 1, _id: 0 });
+    pendingCompanies = await Company.find({status:'pending'},{ name: 1, status: 1, registrationNumber: 1, owner: 1, _id: 0 });
+    totalRequests = await Request.find({})
+    totalUsers = await User.find({})
+    console.log(companies)
+    res.status(201).json({ totalCompanies: companies.length, pendingCompanies: pendingCompanies.length, totalRequests: totalRequests.length,totalUsers:totalUsers.length });
+  }catch (error){
+    res.status(401).json({err:"No Stats"})  
+  }
+  
+
+})
 
 // Validation d'une entreprise (Admin seulement)
 router.patch("/:id/validate", authMiddleware(["admin"]), async (req, res) => {
@@ -57,7 +75,7 @@ router.patch("/:id/reject", authMiddleware(["admin"]), async (req, res) => {
       res.status(400).json({ error: "Rejection failed" });
     }
   });
-router.get("/admin", authMiddleware(["admin"]), async (req, res) => {
+router.get("/admin",authMiddleware(["admin"]) ,async (req, res) => {
   companies = await Company.find(
     {},
     { name: 1, status: 1, registrationNumber: 1, owner: 1, _id: 0 }
@@ -75,7 +93,8 @@ router.get("/list", authMiddleware(["user"]), async (req, res) => {
   res.send(companies);
 });
 
-router.get("/:id/delete", authMiddleware(["user"]), async (req, res) => {
+
+router.delete("/delete/:id", authMiddleware(["user"]), async (req, res) => {
   userId = req.user.id;
   companyId = req.params.id;
   try {

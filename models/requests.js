@@ -8,7 +8,8 @@ const requestSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    status:{type:String,enum:['pending','solved'],default:'pending'}
 
 })
 
